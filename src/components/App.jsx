@@ -32,7 +32,7 @@ const App = () => {
     if (prevContacts && prevContacts !== contacts) {
       localStorage.setItem("contacts", JSON.stringify(contacts));
     }
-  }, [contacts, prevContacts]);
+  }, [contacts]);
 
   // We have to create object with:
   // - keys named like inputs attribute <input name = 'smth'/>
@@ -64,7 +64,6 @@ const App = () => {
       setContacts([...contacts, { id: nanoid(), name: name, number: number }]);
       setName("");
       setNumber("");
-      localStorage.setItem("contacts", JSON.stringify(contacts));
     }
   };
 
