@@ -1,4 +1,4 @@
-import { Component } from "react";
+import { useEffect, useState, useRef } from "react";
 import { nanoid } from "nanoid";
 
 import ContactForm from "./ContactForm";
@@ -6,92 +6,92 @@ import ContactList from "./ContactList";
 
 import Styles from "./App.module.css";
 
-export default class App extends Component {
-  state = {
-    contacts: [],
-    name: "",
-    number: "",
-  };
+const usePrevious = (value) => {
+  const ref = useRef();
+  useEffect(() => {
+    ref.current = value;
+  });
+  return ref.current;
+};
 
-  componentDidMount() {
+const App = () => {
+  const [contacts, setContacts] = useState([]);
+  const [name, setName] = useState("");
+  const [number, setNumber] = useState("");
+
+  const prevContacts = usePrevious(contacts);
+
+  useEffect(() => {
     const contactsFromLocalStorage = localStorage.getItem("contacts");
     if (contactsFromLocalStorage) {
-      this.setState({ contacts: JSON.parse(contactsFromLocalStorage) });
+      setContacts(JSON.parse(contactsFromLocalStorage));
     }
-  }
+  }, []);
 
-  componentDidUpdate(_, prevState) {
-    if (prevState.contacts !== this.state.contacts) {
-      localStorage.setItem("contacts", JSON.stringify(this.state.contacts));
+  useEffect(() => {
+    if (prevContacts && prevContacts !== contacts) {
+      localStorage.setItem("contacts", JSON.stringify(contacts));
     }
-  }
+  }, [contacts, prevContacts]);
 
-  handleInputChange = (ev) => {
+  // We have to create object with:
+  // - keys named like inputs attribute <input name = 'smth'/>
+  // - values using setter function from hook useState (const [example,setExample] = useState(value);
+  const handleInputChange = (ev) => {
     const { name, value } = ev.target;
-    this.setState({ [name]: value });
-  };
-  // THIS IS THE SAME WHAT ABOVE ⬏
-  // inputChangeName = (ev) => {
-  //   this.setState({ name: ev.target.value });
-  // };
-  // inputChangeNumber = (ev) => {
-  //   this.setState({ number: ev.target.value });
-  // };
-
-  buttonAddContact = (ev) => {
-    ev.preventDefault();
-    if (this.state.contacts.find((obj) => obj.name === this.state.name)) {
-      alert(this.state.name + " is already in contacts");
-    } else {
-      this.setState((prevState) => ({
-        contacts: [
-          ...prevState.contacts,
-          {
-            id: nanoid(),
-            name: prevState.name,
-            number: prevState.number,
-          },
-        ],
-        name: "",
-        number: "",
-      }));
+    const setter = {
+      name: setName,
+      number: setNumber,
+    };
+    if (setter[name]) {
+      setter[name](value);
     }
   };
 
-  buttonDelete = (ev) => {
-    this.setState((prevState) => ({
-      contacts: prevState.contacts.filter((obj) => obj.id !== ev.target.value),
-    }));
+  // THIS IS THE SAME WHAT ABOVE but easier declaring 2 functions⬏
+  // const inputChangeName = (ev) => {
+  //   setName(ev.target.value);
+  // };
+  // const inputChangeNumber = (ev) => {
+  //   setNumber(ev.target.value);
+  // };
+
+  const buttonAddContact = (ev) => {
+    ev.preventDefault();
+    if (contacts.find((obj) => obj.name === name)) {
+      alert(name + " is already in contacts");
+    } else {
+      setContacts([...contacts, { id: nanoid(), name: name, number: number }]);
+      setName("");
+      setNumber("");
+      localStorage.setItem("contacts", JSON.stringify(contacts));
+    }
   };
 
-  render() {
-    const options = {
-      // nameHandler: this.inputChangeName,
-      // numberHandler: this.inputChangeNumber,
-      inputHandler: this.handleInputChange,
-      submitHandler: this.buttonAddContact,
-    };
+  const buttonDelete = (ev) => {
+    setContacts(contacts.filter((obj) => obj.id !== ev.target.value));
+  };
 
-    return (
-      <section className={Styles.section}>
-        <div className={Styles.book}>
-          <div className={Styles.leftPage}>
-            <h1>Phonebook</h1>
-            <ContactForm
-              options={options}
-              name={this.state.name}
-              number={this.state.number}
-            />
-          </div>
-          <div className={Styles.rightPage}>
-            <h2>Contacts</h2>
-            <ContactList
-              allContact={this.state.contacts}
-              deleteFunc={this.buttonDelete}
-            />
-          </div>
+  const options = {
+    // nameHandler: inputChangeName,
+    // numberHandler: inputChangeNumber,
+    inputHandler: handleInputChange,
+    submitHandler: buttonAddContact,
+  };
+
+  return (
+    <section className={Styles.section}>
+      <div className={Styles.book}>
+        <div className={Styles.leftPage}>
+          <h1>Phonebook</h1>
+          <ContactForm options={options} name={name} number={number} />
         </div>
-      </section>
-    );
-  }
-}
+        <div className={Styles.rightPage}>
+          <h2>Contacts</h2>
+          <ContactList allContact={contacts} deleteFunc={buttonDelete} />
+        </div>
+      </div>
+    </section>
+  );
+};
+export default App;
