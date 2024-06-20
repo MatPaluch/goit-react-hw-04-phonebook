@@ -3,18 +3,25 @@ import PropTypes from "prop-types";
 import Styles from "./App.module.css";
 
 export default class ContactList extends Component {
+  state = {
+    filterText: "",
+  };
+
   static propTypes = {
     allContact: PropTypes.arrayOf(
       PropTypes.shape({
-        name: PropTypes.string,
         id: PropTypes.string,
+        name: PropTypes.string,
         number: PropTypes.string,
       }),
     ),
-    filterFunc: PropTypes.func,
     deleteFunc: PropTypes.func,
-    filter: PropTypes.string,
   };
+
+  inputFilterName = (ev) => {
+    this.setState({ filterText: ev.target.value });
+  };
+
   render() {
     return (
       <>
@@ -24,12 +31,15 @@ export default class ContactList extends Component {
           id="idFilter"
           type="text"
           name="filter"
-          onChange={this.props.filterFunc}
+          onChange={this.inputFilterName}
           autoComplete="true"
         />
         <ul className={Styles.list}>
-          {this.props.filter === ""
-            ? this.props.allContact.map((obj) => (
+          {this.props.allContact.map(
+            (obj) =>
+              obj.name
+                .toLowerCase()
+                .includes(this.state.filterText.toLowerCase()) && (
                 <li key={obj.id} className={Styles.itemList}>
                   <span>
                     {obj.name}: {obj.number}
@@ -41,26 +51,8 @@ export default class ContactList extends Component {
                     Delete
                   </button>
                 </li>
-              ))
-            : this.props.allContact.map((obj) =>
-                obj.name
-                  .toLowerCase()
-                  .includes(this.props.filter.toLowerCase()) ? (
-                  <li key={obj.id} className={Styles.itemList}>
-                    <span>
-                      {obj.name}: {obj.number}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={this.props.deleteFunc}
-                      value={obj.id}>
-                      Delete
-                    </button>
-                  </li>
-                ) : (
-                  false
-                ),
-              )}
+              ),
+          )}
         </ul>
       </>
     );

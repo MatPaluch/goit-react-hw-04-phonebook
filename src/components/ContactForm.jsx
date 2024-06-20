@@ -5,8 +5,9 @@ import { nanoid } from "nanoid";
 export default class ContactForm extends Component {
   static propTypes = {
     options: PropTypes.shape({
-      nameHandler: PropTypes.func,
-      numberHandler: PropTypes.func,
+      // nameHandler: PropTypes.func,
+      // numberHandler: PropTypes.func,
+      inputHandler: PropTypes.func,
       submitHandler: PropTypes.func,
     }),
     name: PropTypes.string,
@@ -30,7 +31,7 @@ export default class ContactForm extends Component {
             title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
             required
             value={this.props.name}
-            onChange={this.props.options.nameHandler}
+            onChange={this.props.options.inputHandler}
             autoComplete="true"
           />
           <br />
@@ -44,7 +45,7 @@ export default class ContactForm extends Component {
             title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
             required
             value={this.props.number}
-            onChange={this.props.options.numberHandler}
+            onChange={this.props.options.inputHandler}
             autoComplete="true"
           />
           <br />

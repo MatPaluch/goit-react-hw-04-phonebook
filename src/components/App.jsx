@@ -7,33 +7,36 @@ import ContactList from "./ContactList";
 import Styles from "./App.module.css";
 
 export default class App extends Component {
-  constructor() {
-    super();
-
-    const local = localStorage.getItem("contacts");
-    if (local) {
-    } else {
-      localStorage.setItem("contacts", JSON.stringify([]));
-    }
-  }
-
   state = {
     contacts: [],
     name: "",
     number: "",
-    filter: "",
   };
 
-  inputChangeName = (ev) => {
-    this.setState({ name: ev.target.value });
-  };
-  inputChangeNumber = (ev) => {
-    this.setState({ number: ev.target.value });
-  };
+  componentDidMount() {
+    const contactsFromLocalStorage = localStorage.getItem("contacts");
+    if (contactsFromLocalStorage) {
+      this.setState({ contacts: JSON.parse(contactsFromLocalStorage) });
+    }
+  }
 
-  inputFilterName = (ev) => {
-    this.setState({ filter: ev.target.value });
+  componentDidUpdate(_, prevState) {
+    if (prevState.contacts !== this.state.contacts) {
+      localStorage.setItem("contacts", JSON.stringify(this.state.contacts));
+    }
+  }
+
+  handleInputChange = (ev) => {
+    const { name, value } = ev.target;
+    this.setState({ [name]: value });
   };
+  // THIS IS THE SAME WHAT ABOVE ⬏
+  // inputChangeName = (ev) => {
+  //   this.setState({ name: ev.target.value });
+  // };
+  // inputChangeNumber = (ev) => {
+  //   this.setState({ number: ev.target.value });
+  // };
 
   buttonAddContact = (ev) => {
     ev.preventDefault();
@@ -61,18 +64,11 @@ export default class App extends Component {
     }));
   };
 
-  componentDidMount() {
-    const contactsFromLocalStorage = localStorage.getItem("contacts");
-    this.setState({ contacts: JSON.parse(contactsFromLocalStorage) });
-  }
-  componentDidUpdate() {
-    localStorage.setItem("contacts", JSON.stringify(this.state.contacts));
-  }
-
   render() {
     const options = {
-      nameHandler: this.inputChangeName,
-      numberHandler: this.inputChangeNumber,
+      // nameHandler: this.inputChangeName,
+      // numberHandler: this.inputChangeNumber,
+      inputHandler: this.handleInputChange,
       submitHandler: this.buttonAddContact,
     };
 
@@ -91,8 +87,6 @@ export default class App extends Component {
             <h2>Contacts</h2>
             <ContactList
               allContact={this.state.contacts}
-              filter={this.state.filter}
-              filterFunc={this.inputFilterName}
               deleteFunc={this.buttonDelete}
             />
           </div>
